@@ -9,22 +9,31 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.pavithra.roadsy.R;
 import com.pavithra.roadsy.util.PermissionUtils;
+
+import java.util.HashMap;
 
 
 public class CurrentLocationActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
@@ -36,14 +45,44 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
     private boolean mPermissionDenied = false;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     LatLng myPosition;
+    private DrawerLayout drawerLayout;
+    private EditText currentLocationEditText;
+
+    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_current_location);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+
+        currentLocationEditText=findViewById(R.id.currentLocationEditText);
+
+//        NavigationView navigationView = findViewById(R.id);
+//        navigationView.setNavigationItemSelectedListener(
+//                new NavigationView.OnNavigationItemSelectedListener() {
+//
+//                    @Override
+//                    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+//                        // set item as selected to persist highlight
+//                        menuItem.setChecked(true);
+//                        // close drawer when item is tapped
+//                        drawerLayout.closeDrawers();
+//
+//                        // Add code here to update the UI based on the item selected
+//                        // For example, swap UI fragments here
+//
+//                        return true;
+//                    }
+//                });
+
+
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -101,22 +140,50 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
         }
         Location location = locationManager.getLastKnownLocation(provider);
 
-        if (location != null) {
-            // Getting latitude of the current location
-            double latitude = location.getLatitude();
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            // Logic to handle location object
+                            double latitude = location.getLatitude();
 
-            // Getting longitude of the current location
-            double longitude = location.getLongitude();
+                            // Getting longitude of the current location
+                            double longitude = location.getLongitude();
 
-            // Creating a LatLng object for the current location
-            LatLng latLng = new LatLng(latitude, longitude);
+                            // Creating a LatLng object for the current location
+                            LatLng latLng = new LatLng(latitude, longitude);
 
-            myPosition = new LatLng(latitude, longitude);
+                            myPosition = new LatLng(latitude, longitude);
+                            mMap.clear();
+                            mMap.addMarker(new MarkerOptions().position(myPosition).snippet("adsbahsbdha").title("My Position"));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myPosition, 18.0f));
+                            //get current address by invoke an AsyncTask object
+                            new GetAddressTask(CurrentLocationActivity.this).execute(String.valueOf(latitude), String.valueOf(longitude));
+                        }
+                    }
+                });
 
-            googleMap.addMarker(new MarkerOptions().position(myPosition).title("My Position"));
-//            mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myPosition, 18.0f));
-        }
+//        if (location != null) {
+//            // Getting latitude of the current location
+//            double latitude = location.getLatitude();
+//
+//            // Getting longitude of the current location
+//            double longitude = location.getLongitude();
+//
+//            // Creating a LatLng object for the current location
+//            LatLng latLng = new LatLng(latitude, longitude);
+//
+//            myPosition = new LatLng(latitude, longitude);
+//            googleMap.clear();
+//            googleMap.addMarker(new MarkerOptions().position(myPosition).snippet("adsbahsbdha").title("My Position"));
+////            mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
+//            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myPosition, 18.0f));
+//            //get current address by invoke an AsyncTask object
+//            new GetAddressTask(CurrentLocationActivity.this).execute(String.valueOf(latitude), String.valueOf(longitude));
+//        }
     }
 
     /**
@@ -144,6 +211,7 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
+
         Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
     }
 
@@ -180,5 +248,9 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
     private void showMissingPermissionError() {
         PermissionUtils.PermissionDeniedDialog
                 .newInstance(true).show(getSupportFragmentManager(), "dialog");
+    }
+
+    public void callBackDataFromAsyncTask(HashMap<String, String> addressData){
+           currentLocationEditText.setText(addressData.get("address"));
     }
 }
