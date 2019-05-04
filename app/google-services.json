@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "607589931587",
+    "firebase_url": "https://com-pavithra-roadsy.firebaseio.com",
+    "project_id": "com-pavithra-roadsy",
+    "storage_bucket": "com-pavithra-roadsy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:607589931587:android:bf00477abb193140",
+        "android_client_info": {
+          "package_name": "com.pavithra.roadsy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "607589931587-elrnjrp1qcfmddbou8le39iosce197dt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgVdEDkyBGQKupJxB43NaPyxaG0Vi1Nvc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "607589931587-elrnjrp1qcfmddbou8le39iosce197dt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

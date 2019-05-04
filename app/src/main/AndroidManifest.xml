@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest  xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dist="http://schemas.android.com/apk/distribution"
     package="com.pavithra.roadsy">
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality.
     -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -28,7 +24,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <activity android:name=".JobProgress"></activity>
+        <activity android:name=".ClientRequestDisplay" />
+        <activity android:name=".request_service.AdditionalDetails" />
+        <activity android:name=".request_service.RequestService" />
+        <activity android:name=".AdminActivity" />
+        <activity android:name=".MechanicActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -48,8 +49,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pavithra.roadsy.MainActivity" />
         </activity>
-        <activity android:name=".login.ResetPasswordActivity" android:windowSoftInputMode="stateHidden" />
-        <activity android:name=".registration.UserRegistrationActivity" android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".login.ResetPasswordActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".registration.UserRegistrationActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".registration.MechanicRegistrationActivity"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".login.LoginActivity"
             android:label="@string/title_activity_login"
@@ -59,13 +67,23 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.pavithra.roadsy.MainActivity" />
         </activity>
-        <activity android:name=".MainActivity" android:windowSoftInputMode="stateHidden">
+        <activity
+            android:name=".MainActivity"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".messaging.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

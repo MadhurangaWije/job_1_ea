@@ -2,6 +2,7 @@ package com.pavithra.roadsy.login;
 
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +15,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.pavithra.roadsy.MechanicActivity;
 import com.pavithra.roadsy.R;
+import com.pavithra.roadsy.User;
+import com.pavithra.roadsy.AdminActivity;
 import com.pavithra.roadsy.location.CurrentLocationActivity;
 import com.pavithra.roadsy.registration.UserRegistrationActivity;
 import com.pavithra.roadsy.util.DisplayUtil;
@@ -32,6 +45,8 @@ public class LoginActivity extends AppCompatActivity {
     TextView _signupLink;
     TextView _fogotPassword;
     ProgressBar _loginProgressBar;
+
+    FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +92,14 @@ public class LoginActivity extends AppCompatActivity {
                 startActivityForResult(intent, REQUEST_RESET);
             }
         });
+
+        firebaseAuth=FirebaseAuth.getInstance();
+        FirebaseUser user=firebaseAuth.getCurrentUser();
+        if(user!=null){
+            Intent intent = new Intent(getApplicationContext(), CurrentLocationActivity.class);
+            startActivityForResult(intent, REQUEST_SIGNUP);
+            finish();
+        }
     }
 
     public void login() {
@@ -98,16 +121,18 @@ public class LoginActivity extends AppCompatActivity {
 
         // TODO: Implement your own authentication logic here.
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
-
-                        // onLoginFailed();
-//                        progressDialog.dismiss();
+        firebaseAuth.signInWithEmailAndPassword(email,password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            onLoginSuccess(firebaseAuth.getCurrentUser());
+                        }else{
+                            onLoginFailed();
+                        }
                     }
-                }, 3000);
+                });
+
     }
 
     @Override
@@ -128,11 +153,41 @@ public class LoginActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    public void onLoginSuccess() {
+    public void onLoginSuccess(FirebaseUser loggedInFirebaseUser) {
         _loginButton.setEnabled(true);
         _loginProgressBar.setVisibility(View.INVISIBLE);
-        Intent intent = new Intent(getApplicationContext(), CurrentLocationActivity.class);
-        startActivityForResult(intent, REQUEST_SIGNUP);
+
+        FirebaseDatabase database=FirebaseDatabase.getInstance();
+
+        database.getReference("users").child(loggedInFirebaseUser.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                User loggedInUser=dataSnapshot.getValue(User.class);
+                if(loggedInUser!=null) {
+                    Toast.makeText(getApplicationContext(), loggedInUser.getName(), Toast.LENGTH_LONG).show();
+                    signInUser(loggedInUser);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void signInUser(User loggedInUser) {
+        Intent intent=null;
+        if(loggedInUser.getType().equals("user")){
+            intent = new Intent(getApplicationContext(), CurrentLocationActivity.class);
+        }else if(loggedInUser.getType().equals("mechanic")){
+            intent = new Intent(getApplicationContext(), MechanicActivity.class);
+        }else if(loggedInUser.getType().equals("admin")){
+            intent = new Intent(getApplicationContext(), AdminActivity.class);
+        }
+        if(intent!=null){
+            startActivityForResult(intent, REQUEST_SIGNUP);
+        }
         finish();
     }
 

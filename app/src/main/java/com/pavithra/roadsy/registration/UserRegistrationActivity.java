@@ -1,6 +1,8 @@
 package com.pavithra.roadsy.registration;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,13 +14,25 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.SignInMethodQueryResult;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.pavithra.roadsy.R;
+import com.pavithra.roadsy.User;
+import com.pavithra.roadsy.location.CurrentLocationActivity;
 
+import java.util.List;
 
 
 public class UserRegistrationActivity extends AppCompatActivity {
 
     private static final String TAG = "SignupActivity";
+    private static final int REQUEST_CURRENTLOCATION = 1;
 
     EditText _nameText;
     EditText _emailText;
@@ -28,6 +42,8 @@ public class UserRegistrationActivity extends AppCompatActivity {
     EditText _verifyPassword;
     Button _signupButton;
     TextView _loginLink;
+
+    FirebaseAuth firebaseAuth;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,6 +78,9 @@ public class UserRegistrationActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        firebaseAuth=FirebaseAuth.getInstance();
+
     }
 
     public void signup() {
@@ -80,33 +99,116 @@ public class UserRegistrationActivity extends AppCompatActivity {
         progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
-        String name = _nameText.getText().toString();
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
+        final String name = _nameText.getText().toString().trim();
+        final String email = _emailText.getText().toString().trim();
+        final String telephone=_mobileNumber.getText().toString().trim();
+        final String password = _passwordText.getText().toString();
 
         // TODO: Implement your own signup logic here.
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onSignupSuccess or onSignupFailed
-                        // depending on success
-                        onSignupSuccess();
-                        // onSignupFailed();
+        firebaseAuth.fetchSignInMethodsForEmail(email).addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
+            @Override
+            public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
+                if (task.isSuccessful()){
+                    List<String> possibleSignInMehtods=task.getResult().getSignInMethods();
+                    if(possibleSignInMehtods.size()==0){
+
+                        firebaseAuth.createUserWithEmailAndPassword(email,password)
+                                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        if(task.isSuccessful()){
+                                            DatabaseReference dataseRef=FirebaseDatabase.getInstance().getReference("users").child(firebaseAuth.getCurrentUser().getUid());
+                                            User user=new User(name,email,"user",telephone);
+                                            dataseRef.setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (task.isSuccessful()){
+                                                        onSignupSuccess();
+                                                        progressDialog.dismiss();
+                                                    }else{
+                                                        Toast.makeText(getApplicationContext(),"Something went wrong",Toast.LENGTH_LONG).show();
+                                                        onSignupFailed();
+                                                        progressDialog.dismiss();
+                                                    }
+                                                }
+                                            });
+
+                                        }else{
+                                            onSignupFailed();
+                                            progressDialog.dismiss();
+                                        }
+
+                                    }
+
+                                });
+
+
+                    }else{
+                        Toast.makeText(getApplicationContext(),"Email Already Exists!",Toast.LENGTH_LONG).show();
                         progressDialog.dismiss();
+                        onSignupFailed();
                     }
-                }, 3000);
+                }
+            }
+        });
+
+
+//        firebaseAuth.createUserWithEmailAndPassword(email,password)
+//                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<AuthResult> task) {
+//                        if(task.isSuccessful()){
+//                            DatabaseReference dataseRef=FirebaseDatabase.getInstance().getReference("users").child(firebaseAuth.getCurrentUser().getUid());
+//                            User user=new User(name,email,"user",telephone);
+//                            dataseRef.setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                @Override
+//                                public void onComplete(@NonNull Task<Void> task) {
+//                                    if (task.isSuccessful()){
+//                                        onSignupSuccess();
+//                                        progressDialog.dismiss();
+//                                    }else{
+//                                        Toast.makeText(getApplicationContext(),"Something went wrong",Toast.LENGTH_LONG).show();
+//                                    }
+//                                }
+//                            });
+//
+//                        }else{
+//                            onSignupFailed();
+//                        }
+//
+//                    }
+//
+//                });
+
+
+
+
+//        new android.os.Handler().postDelayed(
+//                new Runnable() {
+//                    public void run() {
+//                        // On complete call either onSignupSuccess or onSignupFailed
+//                        // depending on success
+//                        onSignupSuccess();
+//                        // onSignupFailed();
+//                        progressDialog.dismiss();
+//                    }
+//                }, 3000);
     }
 
 
     public void onSignupSuccess() {
+        Toast.makeText(getBaseContext(), "Registration Successful", Toast.LENGTH_LONG).show();
         _signupButton.setEnabled(true);
         setResult(RESULT_OK, null);
+        Intent intent = new Intent(getApplicationContext(), CurrentLocationActivity.class);
+        startActivityForResult(intent, REQUEST_CURRENTLOCATION);
         finish();
     }
 
     public void onSignupFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+
+        Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
 
         _signupButton.setEnabled(true);
     }
