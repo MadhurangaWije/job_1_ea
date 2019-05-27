@@ -25,7 +25,7 @@ public class Controller {
         serviceRequestAPI = retrofit.create(ServiceRequestAPI.class);
     }
 
-    public void sendRequest(ServiceRequestCall serviceRequestCall, Callback<ServiceRequestCall> serviceRequestCallCallback){
+    public void sendRequest(ServiceRequestCall serviceRequestCall, Callback<Void> serviceRequestCallCallback){
 //        Gson gson = new GsonBuilder()
 //                .setLenient()
 //                .create();
@@ -39,14 +39,14 @@ public class Controller {
 //
 //        ServiceRequestAPI serviceRequestAPI = retrofit.create(ServiceRequestAPI.class);
 
-        Call<ServiceRequestCall> call = serviceRequestAPI.postServiceRequest(serviceRequestCall);
+        Call<Void> call = serviceRequestAPI.postServiceRequest(serviceRequestCall);
         call.enqueue(serviceRequestCallCallback);
     }
 
-    public void sendStatus(ServiceStatusCall serviceStatusCall,Callback<String> serviceStatusCallCallback){
+    public void sendStatus(ServiceStatusCall serviceStatusCall,Callback<Void> serviceStatusCallCallback){
 
 
-        Call<String> call = serviceRequestAPI.postServiceStatus(serviceStatusCall);
+        Call<Void> call = serviceRequestAPI.postServiceStatus(serviceStatusCall);
         call.enqueue(serviceStatusCallCallback);
     }
 

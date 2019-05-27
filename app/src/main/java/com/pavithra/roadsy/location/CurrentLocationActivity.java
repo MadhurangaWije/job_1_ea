@@ -4,8 +4,11 @@ package com.pavithra.roadsy.location;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -55,13 +58,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.RemoteMessage;
 import com.pavithra.roadsy.CustomServiceProviderListAdapter;
 import com.pavithra.roadsy.MainActivity;
 import com.pavithra.roadsy.R;
 import com.pavithra.roadsy.User;
-import com.pavithra.roadsy.login.LoginActivity;
 import com.pavithra.roadsy.request_service.RequestService;
 import com.pavithra.roadsy.util.PermissionUtils;
 import java.util.ArrayList;
@@ -95,12 +95,12 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
     FirebaseDatabase firebaseDatabase;
     User loggedInUser;
 
-    private boolean isCurrentLocationServiceRequest=false;
+    private boolean displayLocationUpdate =true;
 
     private Location serviceRequestPlacementLocation;
 
     private PopupWindow mPopupWindow;
-    private ConstraintLayout mRelativeLayout;
+    private ConstraintLayout currentLocationActivityLayout;
 
 //    private ListView listView;
     private ArrayList<User> userArrayList;
@@ -108,12 +108,14 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 
     android.support.design.widget.FloatingActionButton floatingActionButton;
 
+    private PopupWindow mechanicSearchingProgressWindow;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_location);
 
-        mRelativeLayout = findViewById(R.id.rl);
+        currentLocationActivityLayout = findViewById(R.id.rl);
 
         userArrayList=new ArrayList<>();
 
@@ -139,6 +141,7 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
                         final FirebaseDatabase database=FirebaseDatabase.getInstance();
                         DatabaseReference databaseReference=database.getReference("users").child(user.getUid());
                         databaseReference.child("fcmToken").setValue(token);
+                        databaseReference.child("firebaseUid").setValue(user.getUid());
 
                     }
                 });
@@ -211,7 +214,7 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
                 // TODO: Get info about the selected place.
                 Log.i("PLACES", "Place: " + place.getName() + ", " + place.getId());
                 Toast.makeText(getApplicationContext(),place.getLatLng()+"",Toast.LENGTH_LONG).show();
-                isCurrentLocationServiceRequest=false;
+                displayLocationUpdate =false;
 //                searchLocation(place.getLatLng());
                 LatLng latLng=place.getLatLng();
                 if (latLng != null ) {
@@ -256,7 +259,7 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
             public void onError(@NonNull Status status) {
                 // TODO: Handle the error.
                 Log.i("PLACES", "An error occurred: " + status);
-
+                displayLocationUpdate=true;
             }
 
 
@@ -275,12 +278,14 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 
 
 
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User loggedInUser=dataSnapshot.getValue(User.class);
                 if(loggedInUser!=null) {
                     updateUser(loggedInUser);
+                    System.out.println("******************************"+loggedInUser.getName());
+                    System.out.println("******************************"+loggedInUser.getFirebaseUid());
                 }
             }
 
@@ -300,7 +305,7 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
             public void onClick(View v) {
                 displayCurrentLocation();
                 requestServiceBtn.setVisibility(View.VISIBLE);
-//                isCurrentLocationServiceRequest=true;
+//                displayLocationUpdate=true;
 //                signOut();
             }
         });
@@ -355,6 +360,14 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 //        SupportMapFragment fm = (SupportMapFragment)
 //                getSupportFragmentManager().findFragmentById(R.id.map);
 
+        LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        View customView = inflater.inflate(R.layout.service_provider_selection,null);
+
+        mechanicSearchingProgressWindow= new PopupWindow(
+                customView,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
 
     }
 
@@ -418,12 +431,14 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 //                                FirebaseMessaging.getInstance().send(new RemoteMessage.Builder());
                                 mPopupWindow.dismiss();
 
-                                System.out.println("7777777777777(((((((((((((( "+user.getFcmToken());
+                                System.out.println("9743456789");
+                                System.out.println("7777777777777(((((((((((((( "+user.getName()+user.getFcmToken()+user.getFirebaseUid());
+                                System.out.println("7777777777777(((((((((((((( "+loggedInUser.getName()+loggedInUser.getFcmToken()+loggedInUser.getFirebaseUid());
                                 Intent intent = new Intent(getApplicationContext(), RequestService.class);
                                 intent.putExtra("service-provider",user);
                                 intent.putExtra("client",loggedInUser);
+                                System.out.println("CĆCCdfsdfsdfsdfsdfsdfsfdsdLIENT ------- "+loggedInUser.getName());
                                 startActivityForResult(intent, REQUEST_LOGIN);
-                                finish();
 
                                 // This registration token comes from the client FCM SDKs.
 //                                String registrationToken = "fuaE9Ixk220:APA91bGk-yTP-RXauPeV4xGQaJ6BH01E0Aow40IQZ3J-48Wj98GpDDVTTnGAsxelHtvpPY7ryMdeZjdlRzxMwVeKLToOIyzZJ3khEMceLs8lil4hErqehkUhZdMf9PidEvsoo9a-8FEB";
@@ -446,7 +461,8 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
                             }
                         });
 
-                        mPopupWindow.showAtLocation(mRelativeLayout, Gravity.CENTER,0,0);
+                        mPopupWindow.showAtLocation(currentLocationActivityLayout, Gravity.CENTER,0,0);
+                        displayLocationUpdate=true;
 
                     }
 
@@ -710,10 +726,10 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
     @Override
     public void onLocationChanged(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        if(isCurrentLocationServiceRequest){
-//            mMap.addMarker(new MarkerOptions().position(latLng).title("CurrentLocation"));
-//            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-//            updateCurrentLocationInFirebase(location);
+        if(displayLocationUpdate){
+            mMap.addMarker(new MarkerOptions().position(latLng).title("CurrentLocation"));
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            updateCurrentLocationInFirebase(latLng);
         }
 
 //        Toast.makeText(getApplicationContext(),location.getLatitude()+" "+location.getLongitude(),Toast.LENGTH_LONG).show();
@@ -730,4 +746,45 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 
     }
 
+    private BroadcastReceiver mechanicSearchingWindowDisplayBroadcastReciever = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            if(intent.getAction().equals("android.intent.action.WindowClose")){
+                mechanicSearchingProgressWindow.dismiss();
+                //Extract your data - better to use constants...
+
+//                if(serviceStatus.equals("Completed...")){
+//                    serviceCompleted();
+//                }else{
+//                    Toast.makeText(getApplicationContext(),serviceStatus,Toast.LENGTH_LONG).show();
+//                    serviceStatusTextView.setText(serviceStatus);
+//                }
+
+            }else if (intent.getAction().equals("android.intent.action.WindowOpen")){
+                mechanicSearchingProgressWindow.showAtLocation(currentLocationActivityLayout, Gravity.CENTER,0,0);
+            }
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.intent.action.WindowOpen");
+        filter.addAction("android.intent.action.WindowClose");
+        registerReceiver(mechanicSearchingWindowDisplayBroadcastReciever , filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try {
+            if(mechanicSearchingWindowDisplayBroadcastReciever != null){
+                unregisterReceiver(mechanicSearchingWindowDisplayBroadcastReciever);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

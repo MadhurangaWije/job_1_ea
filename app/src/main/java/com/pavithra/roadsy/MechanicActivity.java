@@ -7,6 +7,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +17,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,10 +42,13 @@ import com.pavithra.roadsy.location.GetAddressTask;
 import com.pavithra.roadsy.login.LoginActivity;
 import com.pavithra.roadsy.util.PermissionUtils;
 
+import java.util.HashMap;
+
 public class MechanicActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
         OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback,com.google.android.gms.location.LocationListener{
+        ActivityCompat.OnRequestPermissionsResultCallback,com.google.android.gms.location.LocationListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener{
 
     private static final int REQUEST_SIGNIN = 1;
     Button signOutBtn;
@@ -55,7 +62,12 @@ public class MechanicActivity extends AppCompatActivity implements GoogleMap.OnM
     private LatLng myPosition;
 
     FirebaseAuth firebaseAuth;
+    FirebaseDatabase firebaseDatabase;
     private Location serviceRequestPlacementLocation;
+
+    LocationRequest  locationRequest;
+    GoogleApiClient googleApiClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +83,39 @@ public class MechanicActivity extends AppCompatActivity implements GoogleMap.OnM
         SupportMapFragment fm = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.mechanicMap);
 
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this).build();
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("FCM", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+
+                        // Log and toast
+//                        String msg = getString(1, token);
+                        Log.d("FCM", token);
+//                        Toast.makeText(CurrentLocationActivity.this, token, Toast.LENGTH_SHORT).show();
+
+                        FirebaseUser user=firebaseAuth.getCurrentUser();
+                        final FirebaseDatabase database=FirebaseDatabase.getInstance();
+                        DatabaseReference databaseReference=database.getReference("users").child(user.getUid());
+                        databaseReference.child("fcmToken").setValue(token);
+                        databaseReference.child("firebaseUid").setValue(user.getUid());
+
+                    }
+                });
+
         firebaseAuth=FirebaseAuth.getInstance();
+        firebaseDatabase=FirebaseDatabase.getInstance();
         signOutBtn=findViewById(R.id.signOutBtn);
 
         signOutBtn.setOnClickListener(new View.OnClickListener() {
@@ -98,12 +142,12 @@ public class MechanicActivity extends AppCompatActivity implements GoogleMap.OnM
                         // Log and toast
 //                        String msg = getString(1, token);
                         Log.d("FCM", token);
-                        Toast.makeText(MechanicActivity.this, token, Toast.LENGTH_SHORT).show();
 
                         FirebaseUser user=firebaseAuth.getCurrentUser();
                         final FirebaseDatabase database=FirebaseDatabase.getInstance();
                         DatabaseReference databaseReference=database.getReference("users").child(user.getUid());
                         databaseReference.child("fcmToken").setValue(token);
+                        databaseReference.child("firebaseUid").setValue(user.getUid());
 
                     }
                 });
@@ -118,12 +162,17 @@ public class MechanicActivity extends AppCompatActivity implements GoogleMap.OnM
 
     @Override
     public void onLocationChanged(Location location) {
-
+//        Toast.makeText(getApplicationContext(),"Mechanic activity locationchanged"+location,Toast.LENGTH_SHORT).show();
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(latLng).title("CurrentLocation"));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,18.0f));
+        updateCurrentLocationInFirebase(latLng);
     }
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
@@ -248,5 +297,46 @@ public class MechanicActivity extends AppCompatActivity implements GoogleMap.OnM
             showMissingPermissionError();
             mPermissionDenied = false;
         }
+    }
+
+    private void updateCurrentLocationInFirebase(LatLng latLng){
+
+        DatabaseReference databaseReference=firebaseDatabase.getReference("users").child(firebaseAuth.getCurrentUser().getUid());
+        com.pavithra.roadsy.location.Location myLocation=new com.pavithra.roadsy.location.Location(String.valueOf(latLng.longitude),String.valueOf(latLng.latitude));
+        HashMap map = new HashMap();
+        map.put("location", myLocation);
+
+        databaseReference.updateChildren(map);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        googleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        googleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(1000);
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }

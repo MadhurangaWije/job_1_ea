@@ -18,6 +18,7 @@ import com.pavithra.roadsy.request_service.AdditionalDetails;
 import com.pavithra.roadsy.request_service.AdditionalServiceRequestDetail;
 import com.pavithra.roadsy.request_service.RequiredService;
 import com.pavithra.roadsy.request_service.ServiceRequestCall;
+import com.pavithra.roadsy.util.AppUtill;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,12 +44,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 try {
 
                     jsonObject = new JSONObject(data.get("stringData"));
+                    System.out.println("HJHJHJ " +jsonObject);
 
                     if (jsonObject.isNull("status")) {
-
-
-                        System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" + data.get("stringData"));
-
 
                         JSONObject additionalServiceRequestDetailJSONObj = new JSONObject(jsonObject.getString("additionalServiceRequestDetail"));
                         JSONArray requiredServiceListJSONArray = new JSONArray(jsonObject.getString("requiredServiceList"));
@@ -62,12 +60,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         JSONObject locationServiceProviderJSONObj = new JSONObject(serviceProviderJSONObj.getString("location"));
                         Location locationServiceProvider = new Location(locationServiceProviderJSONObj.getString("longitude"), locationServiceProviderJSONObj.getString("latitude"));
                         User serviceProvider = new User(serviceProviderJSONObj.getString("name"), serviceProviderJSONObj.getString("email"), "mechanic", serviceProviderJSONObj.getString("telephone"), serviceProviderJSONObj.getString("fcmToken"), serviceProviderJSONObj.getString("businessRegistrationNumber"), locationServiceProvider);
+                        serviceProvider.setFirebaseUid(serviceProviderJSONObj.getString("firebaseUid"));
 
                         JSONObject locationClientJSONObj = new JSONObject(clientJSONObj.getString("location"));
-                        System.out.println("##################################" + locationClientJSONObj.getString("longitude"));
                         Location locationClient = new Location(locationClientJSONObj.getString("longitude"), locationClientJSONObj.getString("latitude"));
-                        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + locationClient.getLongitude());
-                        User client = new User(serviceProviderJSONObj.getString("name"), serviceProviderJSONObj.getString("email"), "user", serviceProviderJSONObj.getString("telephone"), serviceProviderJSONObj.getString("fcmToken"), locationClient);
+
+                        User client = new User(clientJSONObj.getString("name"), clientJSONObj.getString("email"), "user", clientJSONObj.getString("telephone"), clientJSONObj.getString("fcmToken"), locationClient);
+                        client.setFirebaseUid(clientJSONObj.getString("firebaseUid"));
 
                         List<RequiredService> requiredServicesList = new ArrayList<>();
 
@@ -78,8 +77,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                         ServiceRequestCall serviceRequestCall = new ServiceRequestCall(requiredServicesList, client, serviceProvider, additionalServiceRequestDetail);
 
-                        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + serviceRequestCall.getClient().getLocation().getLatitude());
-
                         Intent intent = new Intent(getApplicationContext(), ClientRequestDisplay.class);
                         intent.putExtra("service-request-call-for-mechanic", serviceRequestCall);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -87,16 +84,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         startActivity(intent);
 
 
-                        Toast.makeText(getApplicationContext(), "Somthing happened!!! \n" + serviceProviderJSONObj.getString("fcmToken"), Toast.LENGTH_SHORT).show();
-
                 }else{
-                        Toast.makeText(getApplicationContext(), "Somthing happened!!! \n" + jsonObject.getString("status"), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), jsonObject.getString("status"), Toast.LENGTH_SHORT).show();
+                        Intent i = new Intent("android.intent.action.ServiceStatusUpdate").putExtra("service_status", jsonObject.getString("status"));
+                        getApplicationContext().sendBroadcast(i);
                 }
                 } catch (JSONException e) {
-                e.printStackTrace();
-                Toast.makeText(getApplicationContext(), "Somthing bad happened!!! \n json parsing went wrong", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Somthing bad happened!!! \n json parsing went wrong", Toast.LENGTH_SHORT).show();
                 }
-//                Toast.makeText(getApplicationContext(), data.get("name")+" \n"+data.get("service"), Toast.LENGTH_SHORT).show();
             }
         });
     }

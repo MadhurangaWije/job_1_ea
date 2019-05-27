@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivityForResult(intent, REQUEST_LOGIN);
-                finish();
+
             }
         });
 
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), UserRegistrationActivity.class);
                 startActivityForResult(intent, REQUEST_SIGNUP);
-                finish();
+
             }
         });
 
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), MechanicRegistrationActivity.class);
                 startActivityForResult(intent, REQUEST_SIGNUP);
-                finish();
+
             }
         });
     }

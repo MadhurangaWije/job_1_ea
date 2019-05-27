@@ -164,7 +164,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User loggedInUser=dataSnapshot.getValue(User.class);
                 if(loggedInUser!=null) {
-                    Toast.makeText(getApplicationContext(), loggedInUser.getName(), Toast.LENGTH_LONG).show();
                     signInUser(loggedInUser);
                 }
             }
@@ -181,7 +180,15 @@ public class LoginActivity extends AppCompatActivity {
         if(loggedInUser.getType().equals("user")){
             intent = new Intent(getApplicationContext(), CurrentLocationActivity.class);
         }else if(loggedInUser.getType().equals("mechanic")){
-            intent = new Intent(getApplicationContext(), MechanicActivity.class);
+            if(loggedInUser.isBlocked()){
+                Toast.makeText(getApplicationContext(),"Sorry! Your Account have been temporary suspended.\nPlease contact admin",Toast.LENGTH_LONG).show();
+                firebaseAuth.signOut();
+                intent = new Intent(getApplicationContext(), LoginActivity.class);
+
+            }else {
+                intent = new Intent(getApplicationContext(), MechanicActivity.class);
+            }
+
         }else if(loggedInUser.getType().equals("admin")){
             intent = new Intent(getApplicationContext(), AdminActivity.class);
         }

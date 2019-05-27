@@ -23,19 +23,19 @@ import java.util.List;
 public class RequestService extends AppCompatActivity {
 
     RequiredService[] REQUIRED_SERVICES_ARRAY = {
-            new RequiredService("Service 1"),
-            new RequiredService("Service 2"),
-            new RequiredService("Service 3"),
-            new RequiredService("Service 4"),
-            new RequiredService("Service 5"),
-            new RequiredService("Service 6"),
-            new RequiredService("Service 7"),
-            new RequiredService("Service 8"),
+            new RequiredService("On-location flat tire support"),
+            new RequiredService("Battery jump start"),
+            new RequiredService("Lockout service"),
+            new RequiredService("Towing vehicles"),
+            new RequiredService("Fuel delivery service"),
+            new RequiredService("Minor mechanical repairs"),
+            new RequiredService("Vehicle service"),
+            new RequiredService("Vehicle Grooming"),
     };
 
     List<RequiredService> requiredServiceList = Arrays.asList(REQUIRED_SERVICES_ARRAY);
 
-    String[] a={"Apple","Orange","Mango","Pineapple"};
+
 
     ListView listView;
     CheckBox checkBox;
@@ -56,6 +56,8 @@ public class RequestService extends AppCompatActivity {
         Intent intent=getIntent();
         loggedInUser=(User)intent.getSerializableExtra("client");
         selectedServiceProvider=(User)intent.getSerializableExtra("service-provider");
+
+        System.out.println("{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{c  "+selectedServiceProvider.getName());
 
         requestServiceProceedBtn=findViewById(R.id.requestServiceProceedBtn);
 
@@ -97,11 +99,13 @@ public class RequestService extends AppCompatActivity {
                 serviceRequestCall.setServiceProvider(selectedServiceProvider);
 
                 System.out.println("88888888888888888(((((((((((((( "+serviceRequestCall.getServiceProvider().getFcmToken());
+                System.out.println("88888888888888888(((((((((((((( "+serviceRequestCall.getToken());
 
                 Intent intent = new Intent(getApplicationContext(), AdditionalDetails.class);
                 intent.putExtra("service-request-call",serviceRequestCall);
 
                 startActivity(intent);
+                finish();
 
                 Toast.makeText(getApplicationContext(),a,Toast.LENGTH_LONG).show();
             }

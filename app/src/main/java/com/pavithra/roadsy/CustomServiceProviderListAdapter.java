@@ -27,7 +27,6 @@ public class CustomServiceProviderListAdapter extends ArrayAdapter<User> impleme
     }
 
 
-
     @Override
     public void onClick(View v) {
         int position=(Integer) v.getTag();

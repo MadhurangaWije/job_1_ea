@@ -75,6 +75,10 @@ public class ServiceRequestCall implements Serializable {
         System.out.println("*************************************"+this.token);
     }
 
+    public String getToken() {
+        return token;
+    }
+
     public void stringifyTheJson(){
         Data data=new Data(requiredServiceList,client,serviceProvider,additionalServiceRequestDetail);
         this.dataString=new Gson().toJson(data);

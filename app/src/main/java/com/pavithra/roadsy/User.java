@@ -13,7 +13,11 @@ public class User implements Serializable {
 
     private String businessRegistrationNumber;
 
+    private boolean blocked;
+
     private Location location;
+
+    private String firebaseUid;
 
 
 
@@ -42,6 +46,7 @@ public class User implements Serializable {
         this.type = type;
         this.telephone = telephone;
         this.businessRegistrationNumber = businessRegistrationNumber;
+        this.blocked=false;
     }
 
     public User(String name, String email, String type, String telephone, String fcmToken, String businessRegistrationNumber, Location location) {
@@ -52,6 +57,7 @@ public class User implements Serializable {
         this.fcmToken = fcmToken;
         this.businessRegistrationNumber = businessRegistrationNumber;
         this.location = location;
+        this.blocked=false;
     }
 
     public String getName() {
@@ -108,5 +114,21 @@ public class User implements Serializable {
 
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    public String getFirebaseUid() {
+        return firebaseUid;
+    }
+
+    public void setFirebaseUid(String firebaseUID) {
+        this.firebaseUid = firebaseUID;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 }

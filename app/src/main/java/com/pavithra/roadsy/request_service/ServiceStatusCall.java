@@ -22,8 +22,10 @@ public class ServiceStatusCall implements Serializable {
     public ServiceStatusCall(String status,String token) {
         this.status = status;
         this.token=token;
-        Data data=new Data(status);
-        this.dataString=new Gson().toJson(data);
+        if(status!=null) {
+            Data data = new Data(status);
+            this.dataString = new Gson().toJson(data);
+        }
     }
 
     public String getStatus() {
@@ -32,6 +34,14 @@ public class ServiceStatusCall implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDataString() {
+        return dataString;
+    }
+
+    public void setDataString(String dataString) {
+        this.dataString = dataString;
     }
 
     class Data{

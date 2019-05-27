@@ -2,17 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dist="http://schemas.android.com/apk/distribution"
     package="com.pavithra.roadsy">
+
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality.
     -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <dist:module dist:instant="true" />
@@ -24,12 +26,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".JobProgress"></activity>
-        <activity android:name=".ClientRequestDisplay" />
-        <activity android:name=".request_service.AdditionalDetails" />
-        <activity android:name=".request_service.RequestService" />
-        <activity android:name=".AdminActivity" />
-        <activity android:name=".MechanicActivity" />
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -42,6 +39,21 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <activity
+            android:name=".ServiceStatusWithLiveLocationUpdate"
+            android:label="@string/title_activity_service_status_with_live_location_update"></activity>
+        <activity
+            android:name=".JobProgressWithLiveLocationUpdate"
+            android:label="@string/title_activity_job_progress_with_live_location_update" />
+        <activity android:name=".ServiceProviderContact" />
+        <activity android:name=".RegisteredMechanicsAdminView" />
+        <activity android:name=".ServiceStatus" />
+        <activity android:name=".JobProgress" />
+        <activity android:name=".ClientRequestDisplay" />
+        <activity android:name=".request_service.AdditionalDetails" />
+        <activity android:name=".request_service.RequestService" />
+        <activity android:name=".AdminActivity" />
+        <activity android:name=".MechanicActivity" />
         <activity
             android:name=".location.CurrentLocationActivity"
             android:label="@string/title_activity_current_location">

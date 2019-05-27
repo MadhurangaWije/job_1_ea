@@ -6,8 +6,8 @@ import retrofit2.http.POST;
 
 public interface ServiceRequestAPI {
     @POST("helloWorld")
-    Call<ServiceRequestCall> postServiceRequest(@Body ServiceRequestCall serviceRequestCall);
+    Call<Void> postServiceRequest(@Body ServiceRequestCall serviceRequestCall);
 
     @POST("helloWorld2")
-    Call<String> postServiceStatus(@Body ServiceStatusCall serviceStatusCall);
+    Call<Void> postServiceStatus(@Body ServiceStatusCall serviceStatusCall);
 }
