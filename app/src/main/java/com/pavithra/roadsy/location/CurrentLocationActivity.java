@@ -218,39 +218,12 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 //                searchLocation(place.getLatLng());
                 LatLng latLng=place.getLatLng();
                 if (latLng != null ) {
-//            Geocoder geocoder = new Geocoder(this);
-//            try {
-//                addressList = geocoder.getFromLocationName(location, 1);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            for(Address a:addressList){
-//                System.out.println(a.toString());
-//            }
-//            Address address = addressList.get(0);
-//            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
                     mMap.clear();
                     mMap.addMarker(new MarkerOptions().position(latLng).title("J"));
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-
                     serviceRequestPlacementLocation.setLongitude(latLng.longitude);
                     serviceRequestPlacementLocation.setLongitude(latLng.latitude);
-
                     requestServiceBtn.setVisibility(View.VISIBLE);
-//            Toast.makeText(getApplicationContext(),latLng.latitude+" "+latLng.longitude,Toast.LENGTH_LONG).show();
-//
-//            Location l=new Location("");
-//            l.setLongitude(latLng.longitude);
-//            l.setLongitude(latLng.latitude);
-
-//                    updateCurrentLocationInFirebase(latLng);
-//                    DatabaseReference databaseReference=firebaseDatabase.getReference("users").child(firebaseAuth.getCurrentUser().getUid());
-//                    com.pavithra.roadsy.location.Location myLocation=new com.pavithra.roadsy.location.Location(String.valueOf(latLng.longitude),String.valueOf(latLng.latitude));
-//                    HashMap map = new HashMap();
-//                    map.put("location", myLocation);
-//
-//                    databaseReference.updateChildren(map);
                 }
 
             }
@@ -265,9 +238,7 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 
         });
 
-
         serviceRequestPlacementLocation=new Location("");
-
 
         firebaseAuth=FirebaseAuth.getInstance();
         firebaseDatabase=FirebaseDatabase.getInstance();
@@ -284,8 +255,6 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
                 User loggedInUser=dataSnapshot.getValue(User.class);
                 if(loggedInUser!=null) {
                     updateUser(loggedInUser);
-                    System.out.println("******************************"+loggedInUser.getName());
-                    System.out.println("******************************"+loggedInUser.getFirebaseUid());
                 }
             }
 
@@ -305,8 +274,7 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
             public void onClick(View v) {
                 displayCurrentLocation();
                 requestServiceBtn.setVisibility(View.VISIBLE);
-//                displayLocationUpdate=true;
-//                signOut();
+                iamhereBtn.setVisibility(View.GONE);
             }
         });
 
@@ -315,6 +283,7 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
             public void onClick(View v) {
                 getAllMechanicsNearMe(serviceRequestPlacementLocation);
                 requestServiceBtn.setVisibility(View.GONE);
+                iamhereBtn.setVisibility(View.VISIBLE);
             }
         });
 
@@ -326,39 +295,7 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 
 
 
-//        currentLocationEditText=findViewById(R.id.currentLocationEditText);
 
-//        NavigationView navigationView = findViewById(R.id);
-//        navigationView.setNavigationItemSelectedListener(
-//                new NavigationView.OnNavigationItemSelectedListener() {
-//
-//                    @Override
-//                    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-//                        // set item as selected to persist highlight
-//                        menuItem.setChecked(true);
-//                        // close drawer when item is tapped
-//                        drawerLayout.closeDrawers();
-//
-//                        // Add code here to update the UI based on the item selected
-//                        // For example, swap UI fragments here
-//
-//                        return true;
-//                    }
-//                });
-
-
-//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-//        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-//                .findFragmentById(R.id.map);
-//        mapFragment.getMapAsync(this);
-//
-//        // Getting reference to the SupportMapFragment of activity_main.xml
-//        SupportMapFragment fm = (SupportMapFragment)
-//                getSupportFragmentManager().findFragmentById(R.id.map);
 
         LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         View customView = inflater.inflate(R.layout.service_provider_selection,null);
@@ -428,34 +365,12 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 
                                 Toast.makeText(getApplicationContext(),user.getName(),Toast.LENGTH_LONG).show();
 
-//                                FirebaseMessaging.getInstance().send(new RemoteMessage.Builder());
                                 mPopupWindow.dismiss();
 
-                                System.out.println("9743456789");
-                                System.out.println("7777777777777(((((((((((((( "+user.getName()+user.getFcmToken()+user.getFirebaseUid());
-                                System.out.println("7777777777777(((((((((((((( "+loggedInUser.getName()+loggedInUser.getFcmToken()+loggedInUser.getFirebaseUid());
                                 Intent intent = new Intent(getApplicationContext(), RequestService.class);
                                 intent.putExtra("service-provider",user);
                                 intent.putExtra("client",loggedInUser);
-                                System.out.println("CĆCCdfsdfsdfsdfsdfsdfsfdsdLIENT ------- "+loggedInUser.getName());
                                 startActivityForResult(intent, REQUEST_LOGIN);
-
-                                // This registration token comes from the client FCM SDKs.
-//                                String registrationToken = "fuaE9Ixk220:APA91bGk-yTP-RXauPeV4xGQaJ6BH01E0Aow40IQZ3J-48Wj98GpDDVTTnGAsxelHtvpPY7ryMdeZjdlRzxMwVeKLToOIyzZJ3khEMceLs8lil4hErqehkUhZdMf9PidEvsoo9a-8FEB";
-
-// See documentation on defining a message payload.
-//                                Message message = Message.builder()
-//                                        .putData("score", "850")
-//                                        .putData("time", "2:45")
-//                                        .setToken(registrationToken)
-//                                        .build();
-
-// Send a message to the device corresponding to the provided
-// registration token.
-//                                String response = FirebaseMessaging.getInstance().send(message);
-// Response is a message ID string.
-//                                System.out.println("Successfully sent message: " + response);
-
 
 
                             }
@@ -497,11 +412,6 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
@@ -698,28 +608,11 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
 //        List<Address> addressList = null;
 
         if (latLng != null ) {
-//            Geocoder geocoder = new Geocoder(this);
-//            try {
-//                addressList = geocoder.getFromLocationName(location, 1);
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            for(Address a:addressList){
-//                System.out.println(a.toString());
-//            }
-//            Address address = addressList.get(0);
-//            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+
             mMap.clear();
             mMap.addMarker(new MarkerOptions().position(latLng).title("J"));
             mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-//            Toast.makeText(getApplicationContext(),latLng.latitude+" "+latLng.longitude,Toast.LENGTH_LONG).show();
-//
-//            Location l=new Location("");
-//            l.setLongitude(latLng.longitude);
-//            l.setLongitude(latLng.latitude);
 
-//            updateCurrentLocationInFirebase(latLng);
         }
     }
 
@@ -732,7 +625,6 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
             updateCurrentLocationInFirebase(latLng);
         }
 
-//        Toast.makeText(getApplicationContext(),location.getLatitude()+" "+location.getLongitude(),Toast.LENGTH_LONG).show();
     }
 
     private void updateCurrentLocationInFirebase(LatLng latLng){
@@ -752,14 +644,6 @@ public class CurrentLocationActivity extends AppCompatActivity implements Google
         {
             if(intent.getAction().equals("android.intent.action.WindowClose")){
                 mechanicSearchingProgressWindow.dismiss();
-                //Extract your data - better to use constants...
-
-//                if(serviceStatus.equals("Completed...")){
-//                    serviceCompleted();
-//                }else{
-//                    Toast.makeText(getApplicationContext(),serviceStatus,Toast.LENGTH_LONG).show();
-//                    serviceStatusTextView.setText(serviceStatus);
-//                }
 
             }else if (intent.getAction().equals("android.intent.action.WindowOpen")){
                 mechanicSearchingProgressWindow.showAtLocation(currentLocationActivityLayout, Gravity.CENTER,0,0);

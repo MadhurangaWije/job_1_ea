@@ -31,6 +31,7 @@ public class RequestService extends AppCompatActivity {
             new RequiredService("Minor mechanical repairs"),
             new RequiredService("Vehicle service"),
             new RequiredService("Vehicle Grooming"),
+            new RequiredService("Can't figure the required service, need a mechanic"),
     };
 
     List<RequiredService> requiredServiceList = Arrays.asList(REQUIRED_SERVICES_ARRAY);
@@ -57,7 +58,6 @@ public class RequestService extends AppCompatActivity {
         loggedInUser=(User)intent.getSerializableExtra("client");
         selectedServiceProvider=(User)intent.getSerializableExtra("service-provider");
 
-        System.out.println("{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{c  "+selectedServiceProvider.getName());
 
         requestServiceProceedBtn=findViewById(R.id.requestServiceProceedBtn);
 
@@ -67,18 +67,7 @@ public class RequestService extends AppCompatActivity {
         listView=findViewById(R.id.requestServiceListView);
         checkBox=listView.findViewById(R.id.requiredServiceCheckbox);
         adapter=new CustomRequiredServicesListAdapter(requiredServiceList,getApplicationContext());
-//        adapter=new ArrayAdapter<>(getApplicationContext(),android.R.layout.simple_list_item_1,a);
         listView.setAdapter(adapter);
-
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-////                RequiredService requiredService=Arrays.asList(requiredServiceList).get(position);
-////                checkBox.setSelected(requiredService.isRequired());
-//                Toast.makeText(getApplicationContext(),a[position],Toast.LENGTH_LONG).show();
-//
-//            }
-//        });
 
 
         requestServiceProceedBtn.setOnClickListener(new View.OnClickListener() {
@@ -97,9 +86,6 @@ public class RequestService extends AppCompatActivity {
                 serviceRequestCall.setRequiredServiceList(selectedRequiredServiceList);
                 serviceRequestCall.setClient(loggedInUser);
                 serviceRequestCall.setServiceProvider(selectedServiceProvider);
-
-                System.out.println("88888888888888888(((((((((((((( "+serviceRequestCall.getServiceProvider().getFcmToken());
-                System.out.println("88888888888888888(((((((((((((( "+serviceRequestCall.getToken());
 
                 Intent intent = new Intent(getApplicationContext(), AdditionalDetails.class);
                 intent.putExtra("service-request-call",serviceRequestCall);

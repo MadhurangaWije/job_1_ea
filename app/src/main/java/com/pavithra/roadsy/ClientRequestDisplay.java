@@ -48,6 +48,8 @@ public class ClientRequestDisplay extends AppCompatActivity implements OnMapRead
 
         Intent intent=getIntent();
         final ServiceRequestCall serviceRequestCall=(ServiceRequestCall)intent.getSerializableExtra("service-request-call-for-mechanic");
+
+
         String clentUid=serviceRequestCall.getClient().getFirebaseUid();
         firebaseDatabase=FirebaseDatabase.getInstance();
         DatabaseReference databaseReference=firebaseDatabase.getReference("users").child(clentUid);

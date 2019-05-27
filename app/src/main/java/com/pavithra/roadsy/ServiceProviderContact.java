@@ -33,6 +33,5 @@ public class ServiceProviderContact extends AppCompatActivity {
         serviceProviderTelephone.setText(telephone);
 
 
-
     }
 }

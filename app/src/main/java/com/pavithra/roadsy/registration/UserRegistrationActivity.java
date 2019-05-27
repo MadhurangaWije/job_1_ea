@@ -154,46 +154,6 @@ public class UserRegistrationActivity extends AppCompatActivity {
         });
 
 
-//        firebaseAuth.createUserWithEmailAndPassword(email,password)
-//                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<AuthResult> task) {
-//                        if(task.isSuccessful()){
-//                            DatabaseReference dataseRef=FirebaseDatabase.getInstance().getReference("users").child(firebaseAuth.getCurrentUser().getUid());
-//                            User user=new User(name,email,"user",telephone);
-//                            dataseRef.setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                @Override
-//                                public void onComplete(@NonNull Task<Void> task) {
-//                                    if (task.isSuccessful()){
-//                                        onSignupSuccess();
-//                                        progressDialog.dismiss();
-//                                    }else{
-//                                        Toast.makeText(getApplicationContext(),"Something went wrong",Toast.LENGTH_LONG).show();
-//                                    }
-//                                }
-//                            });
-//
-//                        }else{
-//                            onSignupFailed();
-//                        }
-//
-//                    }
-//
-//                });
-
-
-
-
-//        new android.os.Handler().postDelayed(
-//                new Runnable() {
-//                    public void run() {
-//                        // On complete call either onSignupSuccess or onSignupFailed
-//                        // depending on success
-//                        onSignupSuccess();
-//                        // onSignupFailed();
-//                        progressDialog.dismiss();
-//                    }
-//                }, 3000);
     }
 
 

@@ -254,66 +254,6 @@ public class ServiceStatusWithLiveLocationUpdate extends AppCompatActivity imple
     }
 
 
-    private void displayCurrentLocation(){
-        // Getting LocationManager object from System Service LOCATION_SERVICE
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        // Creating a criteria object to retrieve provider
-        Criteria criteria = new Criteria();
-
-        // Getting the name of the best provider
-        String provider = locationManager.getBestProvider(criteria, true);
-
-        // Getting Current Location
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        Location location = locationManager.getLastKnownLocation(provider);
-
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            // Logic to handle location object
-                            double latitude = location.getLatitude();
-
-                            // Getting longitude of the current location
-                            double longitude = location.getLongitude();
-
-                            serviceRequestPlacementLocation.setLatitude(latitude);
-                            serviceRequestPlacementLocation.setLongitude(longitude);
-
-                            // Creating a LatLng object for the current location
-                            LatLng latLng = new LatLng(latitude, longitude);
-
-                            com.pavithra.roadsy.location.Location myLocation=new com.pavithra.roadsy.location.Location(String.valueOf(location.getLongitude()),String.valueOf(location.getLatitude()));
-
-                            FirebaseDatabase database=FirebaseDatabase.getInstance();
-                            DatabaseReference databaseReference=database.getReference("users").child(firebaseAuth.getCurrentUser().getUid());
-                            databaseReference.child("location").setValue(myLocation);
-
-                            myPosition = new LatLng(latitude, longitude);
-//                            mMap.clear();
-//                            mMap.addMarker(new MarkerOptions().position(myPosition).snippet("adsbahsbdha").title("My Position"));
-//                            mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
-//                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myPosition, 18.0f));
-                            //get current address by invoke an AsyncTask object
-//                            new GetAddressTask(CurrentLocationActivity.this).execute(String.valueOf(latitude), String.valueOf(longitude));
-
-                        }
-                    }
-                });
-    }
-
 
     /**
      * Enables the My Location layer if the fine location permission has been granted.
@@ -385,11 +325,7 @@ public class ServiceStatusWithLiveLocationUpdate extends AppCompatActivity imple
 
     @Override
     public void onLocationChanged(Location location) {
-//        Toast.makeText(getApplicationContext(),"Service status mylocation update",Toast.LENGTH_SHORT).show();
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-//            mMap.clear();
-//            mMap.addMarker(new MarkerOptions().position(latLng).title("CurrentLocation"));
-//            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             updateCurrentLocationInFirebase(latLng);
 
 

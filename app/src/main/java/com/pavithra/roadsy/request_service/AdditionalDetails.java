@@ -95,6 +95,7 @@ public class AdditionalDetails extends AppCompatActivity {
 //                        mechanicSearchingProgressWindow.dismiss();
                         Intent i = new Intent("android.intent.action.WindowClose");
                         getApplicationContext().sendBroadcast(i);
+
                         Intent intentForServiceStatus = new Intent(getApplicationContext(), ServiceStatusWithLiveLocationUpdate.class);
                         intentForServiceStatus.putExtra("service-request-call-for-mechanic",serviceRequestCall);
                         startActivity(intentForServiceStatus);
